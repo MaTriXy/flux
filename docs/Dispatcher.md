@@ -4,7 +4,7 @@ title: Dispatcher
 layout: docs
 category: Reference
 permalink: docs/dispatcher.html
-next: react
+next: videos
 ---
 
 Dispatcher is used to broadcast payloads to registered callbacks. This is
@@ -15,6 +15,7 @@ different from generic pub-sub systems in two ways:
 - Callbacks can be deferred in whole or part until other callbacks have
      been executed.
 
+Check out [Dispatcher.js](https://github.com/facebook/flux/blob/master/src/Dispatcher.js) for the source code.
 
 ## API
 
@@ -46,7 +47,7 @@ var CountryStore = {country: null};
 var CityStore = {city: null};
 
 // Keeps track of the base flight price of the selected city
-var FlightPriceStore = {price: null}
+var FlightPriceStore = {price: null};
 ```
 
 When a user changes the selected city, we dispatch the payload:
@@ -61,7 +62,7 @@ flightDispatcher.dispatch({
 This payload is digested by `CityStore`:
 
 ```
-flightDispatcher.register(function(payload)) {
+flightDispatcher.register(function(payload) {
   if (payload.actionType === 'city-update') {
     CityStore.city = payload.selectedCity;
   }

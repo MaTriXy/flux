@@ -1,27 +1,22 @@
 /**
- * Copyright 2013-2014 Facebook, Inc.
+ * This file is provided by Facebook for testing and evaluation purposes
+ * only. Facebook reserves all rights not expressly granted.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * A singleton that operates as the central hub for application updates.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var Dispatcher = require('./Dispatcher');
+var ChatConstants = require('../constants/ChatConstants');
+var Dispatcher = require('flux').Dispatcher;
+var assign = require('object-assign');
 
-// var merge = require('react/lib/merge');
-var copyProperties = require('react/lib/copyProperties');
+var PayloadSources = ChatConstants.PayloadSources;
 
-var ChatAppDispatcher = copyProperties(new Dispatcher(), {
+var ChatAppDispatcher = assign(new Dispatcher(), {
 
   /**
    * @param {object} action The details of the action, including the action's
@@ -29,7 +24,7 @@ var ChatAppDispatcher = copyProperties(new Dispatcher(), {
    */
   handleServerAction: function(action) {
     var payload = {
-      source: 'SERVER_ACTION',
+      source: PayloadSources.SERVER_ACTION,
       action: action
     };
     this.dispatch(payload);
@@ -41,7 +36,7 @@ var ChatAppDispatcher = copyProperties(new Dispatcher(), {
    */
   handleViewAction: function(action) {
     var payload = {
-      source: 'VIEW_ACTION',
+      source: PayloadSources.VIEW_ACTION,
       action: action
     };
     this.dispatch(payload);

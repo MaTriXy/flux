@@ -1,17 +1,13 @@
 /**
- * Copyright 2013-2014 Facebook, Inc.
+ * This file is provided by Facebook for testing and evaluation purposes
+ * only. Facebook reserves all rights not expressly granted.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * FACEBOOK BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 var ChatAppDispatcher = require('../dispatcher/ChatAppDispatcher');
@@ -19,7 +15,7 @@ var ChatConstants = require('../constants/ChatConstants');
 var ChatMessageUtils = require('../utils/ChatMessageUtils');
 var EventEmitter = require('events').EventEmitter;
 var ThreadStore = require('../stores/ThreadStore');
-var merge = require('react/lib/merge');
+var assign = require('object-assign');
 
 var ActionTypes = ChatConstants.ActionTypes;
 var CHANGE_EVENT = 'change';
@@ -45,7 +41,7 @@ function _markAllInThreadRead(threadID) {
   }
 }
 
-var MessageStore = merge(EventEmitter.prototype, {
+var MessageStore = assign({}, EventEmitter.prototype, {
 
   emitChange: function() {
     this.emit(CHANGE_EVENT);
@@ -56,6 +52,10 @@ var MessageStore = merge(EventEmitter.prototype, {
    */
   addChangeListener: function(callback) {
     this.on(CHANGE_EVENT, callback);
+  },
+
+  removeChangeListener: function(callback) {
+    this.removeListener(CHANGE_EVENT, callback);
   },
 
   get: function(id) {
@@ -89,18 +89,6 @@ var MessageStore = merge(EventEmitter.prototype, {
 
   getAllForCurrentThread: function() {
     return this.getAllForThread(ThreadStore.getCurrentID());
-  },
-
-  getCreatedMessageData: function(text) {
-    var timestamp = Date.now();
-    return {
-      id: 'm_' + timestamp,
-      threadID: ThreadStore.getCurrentID(),
-      authorName: 'Bill', // hard coded for the example
-      date: new Date(timestamp),
-      text: text,
-      isRead: true
-    };
   }
 
 });
@@ -117,7 +105,10 @@ MessageStore.dispatchToken = ChatAppDispatcher.register(function(payload) {
       break;
 
     case ActionTypes.CREATE_MESSAGE:
-      var message = MessageStore.getCreatedMessageData(action.text);
+      var message = ChatMessageUtils.getCreatedMessageData(
+        action.text,
+        action.currentThreadID
+      );
       _messages[message.id] = message;
       MessageStore.emitChange();
       break;

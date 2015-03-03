@@ -1,17 +1,10 @@
-/**
- * Copyright 2013-2014 Facebook, Inc.
+/*
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
  *
  * TodoStore
  */
@@ -19,7 +12,7 @@
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var TodoConstants = require('../constants/TodoConstants');
-var merge = require('react/lib/merge');
+var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
 
@@ -32,8 +25,8 @@ var _todos = {};
 function create(text) {
   // Hand waving here -- not showing how this interacts with XHR or persistent
   // server-side storage.
-  // Using the current timestamp in place of a real id.
-  var id = Date.now();
+  // Using the current timestamp + random number in place of a real id.
+  var id = (+new Date() + Math.floor(Math.random() * 999999)).toString(36);
   _todos[id] = {
     id: id,
     complete: false,
@@ -43,18 +36,18 @@ function create(text) {
 
 /**
  * Update a TODO item.
- * @param  {string} id 
- * @param {object} updates An object literal containing only the data to be 
+ * @param  {string} id
+ * @param {object} updates An object literal containing only the data to be
  *     updated.
  */
 function update(id, updates) {
-  _todos[id] = merge(_todos[id], updates);
+  _todos[id] = assign({}, _todos[id], updates);
 }
 
 /**
- * Update all of the TODO items with the same object. 
+ * Update all of the TODO items with the same object.
  *     the data to be updated.  Used to mark all TODOs as completed.
- * @param  {object} updates An object literal containing only the data to be 
+ * @param  {object} updates An object literal containing only the data to be
  *     updated.
 
  */
@@ -83,17 +76,16 @@ function destroyCompleted() {
   }
 }
 
-var TodoStore = merge(EventEmitter.prototype, {
-  
+var TodoStore = assign({}, EventEmitter.prototype, {
+
   /**
    * Tests whether all the remaining TODO items are marked as completed.
-   * @return {booleam}
+   * @return {boolean}
    */
   areAllComplete: function() {
-    for (id in _todos) {
+    for (var id in _todos) {
       if (!_todos[id].complete) {
         return false;
-        break;
       }
     }
     return true;
@@ -126,9 +118,8 @@ var TodoStore = merge(EventEmitter.prototype, {
   }
 });
 
-// Register to handle all updates
-AppDispatcher.register(function(payload) {
-  var action = payload.action;
+// Register callback to handle all updates
+AppDispatcher.register(function(action) {
   var text;
 
   switch(action.actionType) {
@@ -137,6 +128,7 @@ AppDispatcher.register(function(payload) {
       if (text !== '') {
         create(text);
       }
+      TodoStore.emitChange();
       break;
 
     case TodoConstants.TODO_TOGGLE_COMPLETE_ALL:
@@ -145,14 +137,17 @@ AppDispatcher.register(function(payload) {
       } else {
         updateAll({complete: true});
       }
+      TodoStore.emitChange();
       break;
 
     case TodoConstants.TODO_UNDO_COMPLETE:
       update(action.id, {complete: false});
+      TodoStore.emitChange();
       break;
 
     case TodoConstants.TODO_COMPLETE:
       update(action.id, {complete: true});
+      TodoStore.emitChange();
       break;
 
     case TodoConstants.TODO_UPDATE_TEXT:
@@ -160,27 +155,22 @@ AppDispatcher.register(function(payload) {
       if (text !== '') {
         update(action.id, {text: text});
       }
+      TodoStore.emitChange();
       break;
 
     case TodoConstants.TODO_DESTROY:
       destroy(action.id);
+      TodoStore.emitChange();
       break;
 
     case TodoConstants.TODO_DESTROY_COMPLETED:
       destroyCompleted();
+      TodoStore.emitChange();
       break;
 
     default:
-      return true;
+      // no op
   }
-
-  // This often goes in each case that should trigger a UI change. This store
-  // needs to trigger a UI change after every view action, so we can make the
-  // code less repetitive by putting it here.  We need the default case,
-  // however, to make sure this only gets called after one of the cases above.
-  TodoStore.emitChange();
-
-  return true; // No errors.  Needed by promise in Dispatcher.
 });
 
 module.exports = TodoStore;

@@ -1,17 +1,10 @@
-/**
- * Copyright 2013-2014 Facebook, Inc.
+/*
+ * Copyright (c) 2015, Facebook, Inc.
+ * All rights reserved.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
  *
  * TodoActions
  */
@@ -25,7 +18,7 @@ var TodoActions = {
    * @param  {string} text
    */
   create: function(text) {
-    AppDispatcher.handleViewAction({
+    AppDispatcher.dispatch({
       actionType: TodoConstants.TODO_CREATE,
       text: text
     });
@@ -36,7 +29,7 @@ var TodoActions = {
    * @param  {string} text
    */
   updateText: function(id, text) {
-    AppDispatcher.handleViewAction({
+    AppDispatcher.dispatch({
       actionType: TodoConstants.TODO_UPDATE_TEXT,
       id: id,
       text: text
@@ -50,12 +43,12 @@ var TodoActions = {
   toggleComplete: function(todo) {
     var id = todo.id;
     if (todo.complete) {
-      AppDispatcher.handleViewAction({
+      AppDispatcher.dispatch({
         actionType: TodoConstants.TODO_UNDO_COMPLETE,
         id: id
       });
     } else {
-      AppDispatcher.handleViewAction({
+      AppDispatcher.dispatch({
         actionType: TodoConstants.TODO_COMPLETE,
         id: id
       });
@@ -66,7 +59,7 @@ var TodoActions = {
    * Mark all ToDos as complete
    */
   toggleCompleteAll: function() {
-    AppDispatcher.handleViewAction({
+    AppDispatcher.dispatch({
       actionType: TodoConstants.TODO_TOGGLE_COMPLETE_ALL
     });
   },
@@ -75,7 +68,7 @@ var TodoActions = {
    * @param  {string} id
    */
   destroy: function(id) {
-    AppDispatcher.handleViewAction({
+    AppDispatcher.dispatch({
       actionType: TodoConstants.TODO_DESTROY,
       id: id
     });
@@ -85,7 +78,7 @@ var TodoActions = {
    * Delete all the completed ToDos
    */
   destroyCompleted: function() {
-    AppDispatcher.handleViewAction({
+    AppDispatcher.dispatch({
       actionType: TodoConstants.TODO_DESTROY_COMPLETED
     });
   }

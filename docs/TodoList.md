@@ -16,7 +16,7 @@ The TodoMVC example has all this built into it as well, but if you're starting w
 
 Source Code Structure
 ---------------------
-The resulting index.js file may be used as the entry point into our app, but we'll put most of our code in a 'js' directory. Let's let Browserify do its thing, and now we'll open a new tab in Terminal (or a GUI file browser) to look at the directory. It should look something like this:
+The index.html file may be used as the entry point into our app which loads the resulting bundle.js file, but we'll put most of our code in a 'js' directory. Let's let Browserify do its thing, and now we'll open a new tab in Terminal (or a GUI file browser) to look at the directory. It should look something like this:
 
 ```
 myapp
@@ -56,13 +56,13 @@ Now we are ready to create a dispatcher. Here is an naive example of a Dispatche
 
 ```javascript
 var Promise = require('es6-promise').Promise;
-var merge = require('react/lib/merge');
+var assign = require('object-assign');
 
 var _callbacks = [];
 var _promises = [];
 
 var Dispatcher = function() {};
-Dispatcher.prototype = merge(Dispatcher.prototype, {
+Dispatcher.prototype = assign({}, Dispatcher.prototype, {
 
   /**
    * Register a Store's callback so that it may be invoked by an action.
@@ -111,10 +111,9 @@ Now we are all set to create a dispatcher that is more specific to our app, whic
 
 ```javascript
 var Dispatcher = require('./Dispatcher');
+var assign = require('object-assign');
 
-var merge = require('react/lib/merge');
-
-var AppDispatcher = merge(Dispatcher.prototype, {
+var AppDispatcher = assign({}, Dispatcher.prototype, {
 
   /**
    * A bridge function between the views and the dispatcher, marking the action
@@ -145,7 +144,7 @@ We can use Node's EventEmitter to get started with a store. We need EventEmitter
 var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var TodoConstants = require('../constants/TodoConstants');
-var merge = require('react/lib/merge');
+var assign = require('object-assign');
 
 var CHANGE_EVENT = 'change';
 
@@ -173,7 +172,7 @@ function destroy(id) {
   delete _todos[id];
 }
 
-var TodoStore = merge(EventEmitter.prototype, {
+var TodoStore = assign({}, EventEmitter.prototype, {
 
   /**
    * Get the entire collection of TODOs.
@@ -199,7 +198,7 @@ var TodoStore = merge(EventEmitter.prototype, {
    */
   removeChangeListener: function(callback) {
     this.removeListener(CHANGE_EVENT, callback);
-  }
+  },
 
   dispatcherIndex: AppDispatcher.register(function(payload) {
     var action = payload.action;
@@ -230,7 +229,7 @@ var TodoStore = merge(EventEmitter.prototype, {
 module.exports = TodoStore;
 ```
 
-There are a few important things to note in the above code. To start, we are maintaining a private data structure called _todos. This object contains all the individual to-do items. Because this variable lives outside the class, but within the closure of the module, it remains private — it cannot be directly changed from the outside. This helps us preserve a distinct input/output interface for the flow of data by making it impossible to update the store without using an action.
+There are a few important things to note in the above code. To start, we are maintaining a private data structure called _todos. This object contains all the individual to-do items. Because this variable lives outside the class, but within the closure of the module, it remains private — it cannot be directly changed from outside of the module. This helps us preserve a distinct input/output interface for the flow of data by making it impossible to update the store without using an action.
 
 Another important part is the registration of the store's callback with the dispatcher. We pass in our payload handling callback to the dispatcher and preserve the index that this store has in the dispatcher's registry. The callback function currently only handles two actionTypes, but later we can add as many as we need.
 
@@ -241,8 +240,6 @@ Listening to Changes with a Controller-View
 We need a React component near the top of our component hierarchy to listen for changes in the store. In a larger app, we would have more of these listening components, perhaps one for every section of the page. In Facebook's Ads Creation Tool, we have many of these controller-like views, each governing a specific section of the UI. In the Lookback Video Editor, we only had two: one for the animated preview and one for the image selection interface. Here's one for our TodoMVC example. Again, this is slightly abbreviated, but for the full code you can take a look at the TodoMVC example's [TodoApp.react.js](https://github.com/facebook/flux/blob/master/examples/flux-todomvc/js/components/TodoApp.react.js)
 
 ```javascript
-/** @jsx React.DOM */
-
 var Footer = require('./Footer.react');
 var Header = require('./Header.react');
 var MainSection = require('./MainSection.react');
@@ -306,12 +303,13 @@ At a high level, the React component hierarchy of the app looks like this:
 <TodoApp>
   <Header>
     <TodoTextInput />
+  </Header>
 
-    <MainSection>
-      <ul>
-        <TodoItem />
-      </ul>
-    </MainSection>
+  <MainSection>
+    <ul>
+      <TodoItem />
+    </ul>
+  </MainSection>
 
 </TodoApp>
 ```
@@ -327,14 +325,13 @@ for (var key in allTodos) {
 
 return (
   <section id="main">
-  <ul id="todo-list">{todos}</ul>
+    <ul id="todo-list">{todos}</ul>
+  </section>
 );
 ```
 Now each TodoItem can display it's own text, and perform actions utilizing it's own ID. Explaining all the different actions that a TodoItem can invoke in the TodoMVC example goes beyond the scope of this article, but let's just take a look at the action that deletes one of the to-do items. Here is an abbreviated version of the TodoItem:
 
 ```javascript
-/** @jsx React.DOM */
-
 var React = require('react');
 var TodoActions = require('../actions/TodoActions');
 var TodoTextInput = require('./TodoTextInput.react');
@@ -377,8 +374,6 @@ As you'll see below, with every change to the input, React expects us to update 
 Because TodoTextInput is being used in multiple places within our application, with different behaviors, we'll need to pass the onSave method in as a prop from the component's parent. This allows onSave to invoke different actions depending on where it is used.
 
 ```javascript
-/** @jsx React.DOM */
-
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
 
@@ -457,8 +452,6 @@ The Header passes in the onSave method as a prop to allow the TodoTextInput to c
 to-do items:
 
 ```javascript
-/** @jsx React.DOM */
-
 var React = require('react');
 var TodoActions = require('../actions/TodoActions');
 var TodoTextInput = require('./TodoTextInput.react');
@@ -561,13 +554,11 @@ Start Me Up
 The bootstrap file of our application is app.js. It simply takes the TodoApp component and renders it in the root element of the application.
 
 ```javascript
-/** @jsx React.DOM */
-
 var React = require('react');
 
 var TodoApp = require('./components/TodoApp.react');
 
-React.renderComponent(
+React.render(
   <TodoApp />,
   document.getElementById('todoapp')
 );

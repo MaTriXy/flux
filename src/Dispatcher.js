@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2014, Facebook, Inc.
+/**
+ * Copyright (c) 2015, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
@@ -8,7 +8,10 @@
  *
  * @providesModule Dispatcher
  * @typechecks
+ * @preventMunge
  */
+
+"use strict";
 
 var invariant = require('./invariant');
 
@@ -47,7 +50,7 @@ var _prefix = 'ID_';
  *
  * This payload is digested by `CityStore`:
  *
- *   flightDispatcher.register(function(payload)) {
+ *   flightDispatcher.register(function(payload) {
  *     if (payload.actionType === 'city-update') {
  *       CityStore.city = payload.selectedCity;
  *     }
@@ -62,7 +65,7 @@ var _prefix = 'ID_';
  *
  * This payload is digested by both stores:
  *
- *    CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+ *   CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
  *     if (payload.actionType === 'country-update') {
  *       CountryStore.country = payload.selectedCountry;
  *     }
@@ -87,17 +90,13 @@ var _prefix = 'ID_';
  * The usage of `waitFor()` can be chained, for example:
  *
  *   FlightPriceStore.dispatchToken =
- *     flightDispatcher.register(function(payload)) {
+ *     flightDispatcher.register(function(payload) {
  *       switch (payload.actionType) {
  *         case 'country-update':
+ *         case 'city-update':
  *           flightDispatcher.waitFor([CityStore.dispatchToken]);
  *           FlightPriceStore.price =
  *             getFlightPriceStore(CountryStore.country, CityStore.city);
- *           break;
- *
- *         case 'city-update':
- *           FlightPriceStore.price =
- *             FlightPriceStore(CountryStore.country, CityStore.city);
  *           break;
  *     }
  *   });

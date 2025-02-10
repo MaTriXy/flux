@@ -1,10 +1,10 @@
 {
   "name": "flux",
   "description": "An application architecture based on a unidirectional data flow",
-  "version": "2.0.2",
+  "version": "2.1.1",
   "main": "dist/Flux.js",
   "license": "https://github.com/facebook/flux/blob/master/LICENSE",
-  "homepage": "http://facebook.github.io/flux/",
+  "homepage": "https://facebook.github.io/flux/",
   "repository": {
     "type": "git",
     "url": "https://github.com/facebook/flux.git"
@@ -13,7 +13,7 @@
     "Facebook",
     "Jing Chen <jingc@fb.com>",
     "Bill Fisher <fisherwebdev@gmail.com>",
-    "Paul O'Shannessy <paul@oshanessy.com>"
+    "Paul O'Shannessy <paul@oshannessy.com>"
   ],
   "keywords": [
     "flux",
